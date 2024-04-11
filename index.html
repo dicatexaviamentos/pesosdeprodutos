@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leitor de Código de Barras</title>
+</head>
+<body>
+<h1>Leitor de Código de Barras</h1>
+<div id="totalWeight">Total de Peso Lido: 0 kg</div>
+<div id="weightHistory"></div>
+<button onclick="simulateBarcodeScan()">Iniciar Leitura de Código de Barras</button>
+
+<script>
+// Variáveis para armazenar o total de peso lido e o histórico de pesos
+let totalWeight = 0;
+const weightHistory = [];
+
+// Função para processar os dados do código de barras e extrair o peso
+function processBarcodeData(data) {
+    // Extrai o peso do código de barras (os 5 dígitos após o 7º dígito)
+    const weight = parseFloat(data.substr(7, 5)) / 1000; // Converte para kg
+    totalWeight += weight;
+    
+    // Adiciona o peso ao histórico
+    weightHistory.push({
+        barcode: data,
+        weight: weight.toFixed(3)
+    });
+    
+    updateUI();
+
+    // Chama novamente para permitir a leitura contínua
+    setTimeout(simulateBarcodeScan, 0);
+}
+
+// Função para atualizar a interface do usuário
+function updateUI() {
+    document.getElementById('totalWeight').innerText = "Total de Peso Lido: " + totalWeight.toFixed(3) + " kg";
+
+    const weightHistoryDiv = document.getElementById('weightHistory');
+    weightHistoryDiv.innerHTML = ''; // Limpa o conteúdo anterior
+
+    weightHistory.forEach((item, index) => {
+        const itemDiv = document.createElement('div');
+        const deleteButton = document.createElement('button');
+        deleteButton.innerText = 'Excluir';
+        deleteButton.onclick = function() {
+            totalWeight -= parseFloat(weightHistory[index].weight);
+            weightHistory.splice(index, 1);
+            updateUI();
+        };
+        itemDiv.innerText = "Peso: " + item.weight + " kg ";
+        itemDiv.appendChild(deleteButton);
+        weightHistoryDiv.appendChild(itemDiv);
+    });
+}
+
+// Função para simular a leitura do código de barras
+function simulateBarcodeScan() {
+    const barcodeData = prompt("Digite o código de barras:");
+    if (barcodeData) {
+        processBarcodeData(barcodeData);
+    }
+}
+
+</script>
+</body>
+</html>
