@@ -4,12 +4,113 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Leitor de Código de Barras</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.button {
+    display: block;
+    width: 100%;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.button:hover {
+    background-color: #0056b3;
+}
+
+.totalWeight {
+    font-size: 28px;
+    font-weight: bold;
+    margin-top: 20px;
+    text-align: center;
+}
+
+.weightHistory {
+    margin-top: 20px;
+}
+
+.weightItem {
+    padding: 10px;
+    background-color: #fff;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.weightItem button {
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+.weightItem button:hover {
+    background-color: #bd2130;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.modal {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+</style>
 </head>
 <body>
-<h1>Leitor de Código de Barras</h1>
-<div id="totalWeight">Total de Peso Lido: 0 kg</div>
-<div id="weightHistory"></div>
-<button onclick="simulateBarcodeScan()">Iniciar Leitura de Código de Barras</button>
+<div class="container">
+    <h1>Leitor de Código de Barras</h1>
+    <div id="totalWeight" class="totalWeight">Total de Peso Lido: 0 kg</div>
+    <div id="weightHistory" class="weightHistory"></div>
+    <button onclick="showBarcodeInput()" class="button">Iniciar Leitura de Código de Barras</button>
+</div>
+
+<div class="overlay" id="overlay">
+    <div class="modal">
+        <input type="text" id="barcodeInput" placeholder="Digite o código de barras..." onkeypress="handleEnter(event)">
+        <button onclick="hideBarcodeInput()">Cancelar</button>
+    </div>
+</div>
 
 <script>
 // Variáveis para armazenar o total de peso lido e o histórico de pesos
@@ -31,18 +132,25 @@ function processBarcodeData(data) {
     updateUI();
 
     // Chama novamente para permitir a leitura contínua
-    setTimeout(simulateBarcodeScan, 0);
+    setTimeout(showBarcodeInput, 0);
 }
 
 // Função para atualizar a interface do usuário
 function updateUI() {
-    document.getElementById('totalWeight').innerText = "Total de Peso Lido: " + totalWeight.toFixed(3) + " kg";
+    const totalWeightElement = document.getElementById('totalWeight');
+    totalWeightElement.innerText = "Total de Peso Lido: " + totalWeight.toFixed(3) + " kg";
 
     const weightHistoryDiv = document.getElementById('weightHistory');
     weightHistoryDiv.innerHTML = ''; // Limpa o conteúdo anterior
 
     weightHistory.forEach((item, index) => {
         const itemDiv = document.createElement('div');
+        itemDiv.classList.add('weightItem');
+        
+        const weightText = document.createElement('span');
+        weightText.innerText = "Peso: " + item.weight + " kg ";
+        itemDiv.appendChild(weightText);
+        
         const deleteButton = document.createElement('button');
         deleteButton.innerText = 'Excluir';
         deleteButton.onclick = function() {
@@ -50,17 +158,40 @@ function updateUI() {
             weightHistory.splice(index, 1);
             updateUI();
         };
-        itemDiv.innerText = "Peso: " + item.weight + " kg ";
         itemDiv.appendChild(deleteButton);
+        
         weightHistoryDiv.appendChild(itemDiv);
     });
 }
 
-// Função para simular a leitura do código de barras
-function simulateBarcodeScan() {
-    const barcodeData = prompt("Digite o código de barras:");
+// Função para exibir a tela de digitar o código de barras
+function showBarcodeInput() {
+    const overlay = document.getElementById('overlay');
+    overlay.style.display = 'flex';
+    document.getElementById('barcodeInput').focus();
+}
+
+// Função para ocultar a tela de digitar o código de barras
+function hideBarcodeInput() {
+    const overlay = document.getElementById('overlay');
+    overlay.style.display = 'none';
+}
+
+// Função para processar o código de barras digitado
+function processBarcode() {
+    const barcodeInput = document.getElementById('barcodeInput');
+    const barcodeData = barcodeInput.value.trim();
     if (barcodeData) {
         processBarcodeData(barcodeData);
+        barcodeInput.value = ''; // Limpa o campo de entrada
+    }
+    hideBarcodeInput();
+}
+
+// Função para lidar com a tecla Enter no campo de entrada
+function handleEnter(event) {
+    if (event.key === 'Enter') {
+        processBarcode();
     }
 }
 
