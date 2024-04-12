@@ -18,6 +18,9 @@ body {
     background-color: #f9f9f9;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 h1 {
@@ -28,9 +31,9 @@ h1 {
 }
 
 .button {
-    display: block;
     width: 100%;
     padding: 10px 20px;
+    margin-bottom: 10px;
     font-size: 16px;
     background-color: #007bff;
     color: #fff;
@@ -43,21 +46,36 @@ h1 {
     background-color: #0056b3;
 }
 
+/* Estilo para o container dos botões */
+.button-container {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px; /* Adiciona espaço abaixo dos botões */
+}
+
+/* Estilo para os botões */
+.button-container button {
+    flex: 1; /* Para dividir igualmente o espaço entre os botões */
+    margin-right: 10px; /* Adiciona espaço entre os botões */
+    background-color: #001f3f; /* Azul marinho */
+}
+
 .totalWeight {
     font-size: 28px;
     font-weight: bold;
-    margin-top: 20px;
+    margin-bottom: 20px; /* Adiciona espaço abaixo do peso total */
     text-align: center;
 }
 
 .weightHistory {
-    margin-top: 20px;
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
 }
 
 .weightItem {
-    flex: 0 0 calc(33.333% - 20px);
+    flex: 0 0 calc(30% - 20px);
     padding: 10px;
     background-color: #fff;
     border-radius: 4px;
@@ -65,6 +83,12 @@ h1 {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     margin-right: 10px; /* Adiciona margem à direita */
 }
+
+.weightItem span {
+    font-size: 14px; /* Reduz a fonte */
+    font-weight: bold; /* Adiciona negrito */
+}
+
 
 .weightItem button {
     background-color: #dc3545;
@@ -106,21 +130,24 @@ h1 {
 <div class="container">
     <h1>Dicatex Aviamentos</h1>
     <div id="totalWeight" class="totalWeight">Peso Total: 0,000 kg</div>
+    <div class="button-container">
+        <button onclick="showBarcodeInput()" class="button">Calcular Pesos</button>
+        <button onclick="resetWeight()" class="button">Reiniciar</button>
+    </div>
     <div id="weightHistory" class="weightHistory"></div>
-    <button onclick="showBarcodeInput()" class="button">Iniciar Leitura de Código de Barras</button>
 </div>
 
 <div class="overlay" id="overlay">
     <div class="modal">
         <input type="text" id="barcodeInput" placeholder="Digite o código de barras..." onkeypress="handleEnter(event)">
-        <button onclick="hideBarcodeInput()">Cancelar</button>
+        <button onclick="hideBarcodeInput()">Sair</button>
     </div>
 </div>
 
 <script>
 // Variáveis para armazenar o total de peso lido e o histórico de pesos
 let totalWeight = 0;
-const weightHistory = [];
+let weightHistory = [];
 
 // Função para processar os dados do código de barras e extrair o peso
 function processBarcodeData(data) {
@@ -163,7 +190,9 @@ function updateUI() {
             weightHistory.splice(index, 1);
             updateUI();
         };
+        
         itemDiv.appendChild(deleteButton);
+        
         
         weightHistoryDiv.appendChild(itemDiv);
     });
@@ -198,6 +227,13 @@ function handleEnter(event) {
     if (event.key === 'Enter') {
         processBarcode();
     }
+}
+
+// Função para reiniciar o peso total e o histórico de pesos
+function resetWeight() {
+    totalWeight = 0;
+    weightHistory = [];
+    updateUI();
 }
 
 </script>
